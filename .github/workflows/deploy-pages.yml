@@ -1,0 +1,110 @@
+name: Deploy Static Registry to GitHub Pages
+
+on:
+  push:
+    branches: [ foculoom-config ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Generate static API responses
+        run: |
+          mkdir -p dist/v0.1/servers
+          
+          # Generate servers list
+          cat > dist/v0.1/servers/index.json << 'EOF'
+          {"servers":[{"server":{"$schema":"https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json","name":"io.github.foculoom/fal-ai","description":"Fal.ai MCP server for Flux Kontext image generation with character consistency. Supports multi-frame sprite generation with high identity preservation.","repository":{"url":"https://github.com/foculoom/fal-mcp.git","source":"github"},"version":"1.0.0","packages":[{"registryType":"local","identifier":"/Users/hello/foculoom/tools/fal-mcp/dist/index.js","runtimeHint":"node --env-file-if-exists","transport":{"type":"stdio"},"environmentVariables":[{"description":"Fal.ai API key for image generation","isRequired":true,"isSecret":true,"name":"FAL_KEY"},{"description":"Directory path for generated image output","default":"/Users/hello/foculoom/infra/foculoombrand/assets/generated","name":"IMAGE_OUTPUT_DIR"}]}]},"_meta":{"io.modelcontextprotocol.registry/official":{"status":"active","isLatest":true}}},{"server":{"$schema":"https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json","name":"io.github.foculoom/openai-image","description":"OpenAI GPT-4 image generation MCP server using gpt-image-1 model. Generates images from text prompts with support for custom output directories.","repository":{"url":"https://github.com/foculoom/openai-gpt-image-mcp.git","source":"github"},"version":"1.0.0","packages":[{"registryType":"local","identifier":"/Users/hello/foculoom/tools/openai-gpt-image-mcp/dist/index.js","runtimeHint":"node --env-file-if-exists","transport":{"type":"stdio"},"environmentVariables":[{"description":"OpenAI API key for GPT-4 image generation","isRequired":true,"isSecret":true,"name":"OPENAI_API_KEY"},{"description":"Directory path for generated image output","default":"/Users/hello/foculoom/infra/foculoombrand/assets/generated","name":"MCP_HF_WORK_DIR"}]}]},"_meta":{"io.modelcontextprotocol.registry/official":{"status":"active","isLatest":true}}},{"server":{"$schema":"https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json","name":"io.github.foculoom/suno","description":"Suno AI music and audio generation MCP server. Creates music clips and audio from text prompts with custom style control.","repository":{"url":"https://github.com/foculoom/suno-mcp.git","source":"github"},"version":"1.0.0","packages":[{"registryType":"local","identifier":"/Users/hello/foculoom/tools/suno-mcp/dist/index.js","runtimeHint":"node --env-file-if-exists","transport":{"type":"stdio"},"environmentVariables":[{"description":"Suno API key or authentication token","isRequired":true,"isSecret":true,"name":"SUNO_API_KEY"},{"description":"Directory path for generated audio output","default":"/Users/hello/foculoom/infra/foculoombrand/assets/audio/generated","name":"AUDIO_OUTPUT_DIR"}]}]},"_meta":{"io.modelcontextprotocol.registry/official":{"status":"active","isLatest":true}}},{"server":{"$schema":"https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json","name":"io.github.foculoom/tom","description":"Digital Twin MCP server for cross-repo analysis and AI twin synchronization. Provides tools for repository impact analysis, continuation prompts, and twin state management.","repository":{"url":"https://github.com/foculoom/dtwin.git","source":"github"},"version":"1.0.0","packages":[{"registryType":"local","identifier":"/Users/hello/foculoom/infra/dtwin/scripts/run-mcp-server.sh","runtimeHint":"Local script execution","transport":{"type":"stdio"},"environmentVariables":[{"description":"Python command to use for running the MCP server","default":"python3","name":"DTWIN_PYTHON_COMMAND"}]}]},"_meta":{"io.modelcontextprotocol.registry/official":{"status":"active","isLatest":true}}}],"metadata":{"count":4}}
+          EOF
+          
+          # Create server-specific directories and files
+          for server in "io.github.foculoom%2Ftom" "io.github.foculoom%2Fopenai-image" "io.github.foculoom%2Fsuno" "io.github.foculoom%2Ffal-ai"; do
+            mkdir -p "dist/v0.1/servers/$server/versions"
+          done
+          
+          # Tom
+          cat > dist/v0.1/servers/io.github.foculoom%2Ftom/versions/latest.json << 'EOF'
+          {"server":{"$schema":"https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json","name":"io.github.foculoom/tom","description":"Digital Twin MCP server for cross-repo analysis and AI twin synchronization. Provides tools for repository impact analysis, continuation prompts, and twin state management.","repository":{"url":"https://github.com/foculoom/dtwin.git","source":"github"},"version":"1.0.0","packages":[{"registryType":"local","identifier":"/Users/hello/foculoom/infra/dtwin/scripts/run-mcp-server.sh","runtimeHint":"Local script execution","transport":{"type":"stdio"},"environmentVariables":[{"description":"Python command to use for running the MCP server","default":"python3","name":"DTWIN_PYTHON_COMMAND"}]}]},"_meta":{"io.modelcontextprotocol.registry/official":{"status":"active","isLatest":true}}}
+          EOF
+          cp dist/v0.1/servers/io.github.foculoom%2Ftom/versions/latest.json dist/v0.1/servers/io.github.foculoom%2Ftom/versions/1.0.0.json
+          
+          # OpenAI Image
+          cat > dist/v0.1/servers/io.github.foculoom%2Fopenai-image/versions/latest.json << 'EOF'
+          {"server":{"$schema":"https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json","name":"io.github.foculoom/openai-image","description":"OpenAI GPT-4 image generation MCP server using gpt-image-1 model. Generates images from text prompts with support for custom output directories.","repository":{"url":"https://github.com/foculoom/openai-gpt-image-mcp.git","source":"github"},"version":"1.0.0","packages":[{"registryType":"local","identifier":"/Users/hello/foculoom/tools/openai-gpt-image-mcp/dist/index.js","runtimeHint":"node --env-file-if-exists","transport":{"type":"stdio"},"environmentVariables":[{"description":"OpenAI API key for GPT-4 image generation","isRequired":true,"isSecret":true,"name":"OPENAI_API_KEY"},{"description":"Directory path for generated image output","default":"/Users/hello/foculoom/infra/foculoombrand/assets/generated","name":"MCP_HF_WORK_DIR"}]}]},"_meta":{"io.modelcontextprotocol.registry/official":{"status":"active","isLatest":true}}}
+          EOF
+          cp dist/v0.1/servers/io.github.foculoom%2Fopenai-image/versions/latest.json dist/v0.1/servers/io.github.foculoom%2Fopenai-image/versions/1.0.0.json
+          
+          # Suno
+          cat > dist/v0.1/servers/io.github.foculoom%2Fsuno/versions/latest.json << 'EOF'
+          {"server":{"$schema":"https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json","name":"io.github.foculoom/suno","description":"Suno AI music and audio generation MCP server. Creates music clips and audio from text prompts with custom style control.","repository":{"url":"https://github.com/foculoom/suno-mcp.git","source":"github"},"version":"1.0.0","packages":[{"registryType":"local","identifier":"/Users/hello/foculoom/tools/suno-mcp/dist/index.js","runtimeHint":"node --env-file-if-exists","transport":{"type":"stdio"},"environmentVariables":[{"description":"Suno API key or authentication token","isRequired":true,"isSecret":true,"name":"SUNO_API_KEY"},{"description":"Directory path for generated audio output","default":"/Users/hello/foculoom/infra/foculoombrand/assets/audio/generated","name":"AUDIO_OUTPUT_DIR"}]}]},"_meta":{"io.modelcontextprotocol.registry/official":{"status":"active","isLatest":true}}}
+          EOF
+          cp dist/v0.1/servers/io.github.foculoom%2Fsuno/versions/latest.json dist/v0.1/servers/io.github.foculoom%2Fsuno/versions/1.0.0.json
+          
+          # Fal AI
+          cat > dist/v0.1/servers/io.github.foculoom%2Ffal-ai/versions/latest.json << 'EOF'
+          {"server":{"$schema":"https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json","name":"io.github.foculoom/fal-ai","description":"Fal.ai MCP server for Flux Kontext image generation with character consistency. Supports multi-frame sprite generation with high identity preservation.","repository":{"url":"https://github.com/foculoom/fal-mcp.git","source":"github"},"version":"1.0.0","packages":[{"registryType":"local","identifier":"/Users/hello/foculoom/tools/fal-mcp/dist/index.js","runtimeHint":"node --env-file-if-exists","transport":{"type":"stdio"},"environmentVariables":[{"description":"Fal.ai API key for image generation","isRequired":true,"isSecret":true,"name":"FAL_KEY"},{"description":"Directory path for generated image output","default":"/Users/hello/foculoom/infra/foculoombrand/assets/generated","name":"IMAGE_OUTPUT_DIR"}]}]},"_meta":{"io.modelcontextprotocol.registry/official":{"status":"active","isLatest":true}}}
+          EOF
+          cp dist/v0.1/servers/io.github.foculoom%2Ffal-ai/versions/latest.json dist/v0.1/servers/io.github.foculoom%2Ffal-ai/versions/1.0.0.json
+          
+          # Create _headers file for CORS
+          cat > dist/_headers << 'EOF'
+          /v0.1/servers/*
+            Access-Control-Allow-Origin: *
+            Access-Control-Allow-Methods: GET, OPTIONS
+            Access-Control-Allow-Headers: Authorization, Content-Type
+            Content-Type: application/json
+          EOF
+          
+          # Create index.html
+          cat > dist/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Foculoom MCP Registry</title>
+            <meta charset="utf-8">
+          </head>
+          <body>
+            <h1>Foculoom MCP Registry</h1>
+            <p>This is the Foculoom organization MCP server registry.</p>
+            <p>API Endpoints:</p>
+            <ul>
+              <li><a href="/v0.1/servers/">/v0.1/servers</a> - List all servers</li>
+            </ul>
+          </body>
+          </html>
+          EOF
+          
+          # Copy servers list to non-index location too
+          cp dist/v0.1/servers/index.json dist/v0.1/servers.json
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

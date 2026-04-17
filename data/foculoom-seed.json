@@ -1,0 +1,136 @@
+[
+  {
+    "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+    "name": "io.github.foculoom/tom",
+    "description": "Digital Twin MCP server for cross-repo analysis and AI twin synchronization. Provides tools for repository impact analysis, continuation prompts, and twin state management.",
+    "repository": {
+      "url": "https://github.com/foculoom/dtwin.git",
+      "source": "github"
+    },
+    "version": "1.0.0",
+    "packages": [
+      {
+        "registryType": "local",
+        "identifier": "/Users/hello/foculoom/infra/dtwin/scripts/run-mcp-server.sh",
+        "runtimeHint": "Local script execution",
+        "transport": {
+          "type": "stdio"
+        },
+        "environmentVariables": [
+          {
+            "description": "Python command to use for running the MCP server",
+            "isRequired": false,
+            "isSecret": false,
+            "name": "DTWIN_PYTHON_COMMAND",
+            "default": "python3"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+    "name": "io.github.foculoom/openai-image",
+    "description": "OpenAI GPT-4 image generation MCP server using gpt-image-1 model. Generates images from text prompts with support for custom output directories.",
+    "repository": {
+      "url": "https://github.com/foculoom/openai-gpt-image-mcp.git",
+      "source": "github"
+    },
+    "version": "1.0.0",
+    "packages": [
+      {
+        "registryType": "local",
+        "identifier": "/Users/hello/foculoom/tools/openai-gpt-image-mcp/dist/index.js",
+        "runtimeHint": "node --env-file-if-exists",
+        "transport": {
+          "type": "stdio"
+        },
+        "environmentVariables": [
+          {
+            "description": "OpenAI API key for GPT-4 image generation",
+            "isRequired": true,
+            "isSecret": true,
+            "name": "OPENAI_API_KEY"
+          },
+          {
+            "description": "Directory path for generated image output",
+            "isRequired": false,
+            "isSecret": false,
+            "name": "MCP_HF_WORK_DIR",
+            "default": "/Users/hello/foculoom/infra/foculoombrand/assets/generated"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+    "name": "io.github.foculoom/suno",
+    "description": "Suno AI music and audio generation MCP server. Creates music clips and audio from text prompts with custom style control.",
+    "repository": {
+      "url": "https://github.com/foculoom/suno-mcp.git",
+      "source": "github"
+    },
+    "version": "1.0.0",
+    "packages": [
+      {
+        "registryType": "local",
+        "identifier": "/Users/hello/foculoom/tools/suno-mcp/dist/index.js",
+        "runtimeHint": "node --env-file-if-exists",
+        "transport": {
+          "type": "stdio"
+        },
+        "environmentVariables": [
+          {
+            "description": "Suno API key or authentication token",
+            "isRequired": true,
+            "isSecret": true,
+            "name": "SUNO_API_KEY"
+          },
+          {
+            "description": "Directory path for generated audio output",
+            "isRequired": false,
+            "isSecret": false,
+            "name": "AUDIO_OUTPUT_DIR",
+            "default": "/Users/hello/foculoom/infra/foculoombrand/assets/audio/generated"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+    "name": "io.github.foculoom/fal-ai",
+    "description": "Fal.ai MCP server for Flux Kontext image generation with character consistency. Supports multi-frame sprite generation with high identity preservation.",
+    "repository": {
+      "url": "https://github.com/foculoom/fal-mcp.git",
+      "source": "github"
+    },
+    "version": "1.0.0",
+    "packages": [
+      {
+        "registryType": "local",
+        "identifier": "/Users/hello/foculoom/tools/fal-mcp/dist/index.js",
+        "runtimeHint": "node --env-file-if-exists",
+        "transport": {
+          "type": "stdio"
+        },
+        "environmentVariables": [
+          {
+            "description": "Fal.ai API key for image generation",
+            "isRequired": true,
+            "isSecret": true,
+            "name": "FAL_KEY"
+          },
+          {
+            "description": "Directory path for generated image output",
+            "isRequired": false,
+            "isSecret": false,
+            "name": "IMAGE_OUTPUT_DIR",
+            "default": "/Users/hello/foculoom/infra/foculoombrand/assets/generated"
+          }
+        ]
+      }
+    ]
+  }
+]

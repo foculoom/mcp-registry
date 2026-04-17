@@ -1,0 +1,33 @@
+services:
+  registry:
+    image: ghcr.io/modelcontextprotocol/registry:latest
+    container_name: mcp-registry
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - MCP_REGISTRY_DATABASE_URL=postgres://mcpregistry:mcpregistry@postgres:5432/mcp-registry
+      - MCP_REGISTRY_ENVIRONMENT=production
+      - MCP_REGISTRY_SEED_FROM=/data/foculoom-seed.json
+      - MCP_REGISTRY_ENABLE_REGISTRY_VALIDATION=false
+      - MCP_REGISTRY_ENABLE_ANONYMOUS_AUTH=true
+      - MCP_REGISTRY_JWT_PRIVATE_KEY=bb2c6b424005acd5df47a9e2c87f446def86dd740c888ea3efb825b23f7ef47c
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/data:ro
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: mcp-postgres
+    environment:
+      POSTGRES_DB: mcp-registry
+      POSTGRES_USER: mcpregistry
+      POSTGRES_PASSWORD: mcpregistry
+      PGDATA: /var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mcpregistry -d mcp-registry"]
+      interval: 1s
+      retries: 30
+    restart: unless-stopped
